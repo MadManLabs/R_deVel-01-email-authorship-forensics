@@ -1,10 +1,8 @@
 # Functions
 
-<<<<<<< HEAD
 full_text <- lipsum::lipsum[1]
 
-=======
->>>>>>> master
+
 is.letter <- function(x) grepl("[[:alpha:]]", x)
 is.number <- function(x) grepl("[[:digit:]]", x)
 

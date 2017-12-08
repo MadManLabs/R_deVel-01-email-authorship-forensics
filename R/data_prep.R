@@ -1,10 +1,5 @@
 source("R/packages.R")
-<<<<<<< HEAD
 #source("R/functions.R")
-=======
-source("R/functions.R")
-
->>>>>>> master
 
 # Data loading and preparation
 
@@ -19,13 +14,15 @@ for (c in candidates){
   files[[c]] <- dir(paste0(datapath,"/",c))
 }
 
+# Remove following
+
+#00006 + 00037
+files[["candidate00006"]] <- files[["candidate00006"]] %>% .[. != "known00037.txt"]
+files[["candidate00020"]] <- files[["candidate00020"]] %>% .[. != "known00054.txt"]
+
 content <- list()
 
-<<<<<<< HEAD
 for (c in candidates){
-=======
-for (c in candidates[1:4]){
->>>>>>> master
   candi <- list()
   
   for (t in 1:length(files[[c]])){
@@ -35,12 +32,8 @@ for (c in candidates[1:4]){
                  fill = T,
                  blank.lines.skip = F,
                  stringsAsFactors = FALSE,
-<<<<<<< HEAD
                  encoding = "UTF-8",
                  row.names=NULL) %>% 
-=======
-                 encoding = "UTF-8") %>% 
->>>>>>> master
       as.data.frame()
     candi[[paste0(files[[c]][t])]] <- text
   }
@@ -48,11 +41,8 @@ for (c in candidates[1:4]){
   content[[c]] <- candi
 }
 
-<<<<<<< HEAD
 saveRDS(content,"data/raw_content.rds")
 
-=======
->>>>>>> master
 #  Features: 
 
 source("R/feature_functions.R")
@@ -60,7 +50,6 @@ source("R/feature_functions.R")
 
 df <- data.frame()
 
-<<<<<<< HEAD
 
 ##################
 content[[c]][[t]]
@@ -69,19 +58,20 @@ content[[c]][[t]]
 
 #################
 
-for (c in candidates){
 
+
+for (c in candidates){
+  
+  # throw out | 0006+0037
+  
+  
   ts <- 1:length(files[[c]])
+  
   for (t in ts){
     
     ## fixes
     
     ## 
-=======
-for (c in candidates[1:4]){
-
-  for (t in 1:length(files[[c]])){
->>>>>>> master
     
     rowwise_text <- 
       content[[c]][[t]] %>% 
@@ -90,11 +80,8 @@ for (c in candidates[1:4]){
       do(text = paste0(.,collapse = " ")) %>% 
       .$text
     
-<<<<<<< HEAD
     dim(rowwise_text)
     
-=======
->>>>>>> master
     vector_row_text <- 
       rowwise_text %>% paste0()
 
@@ -162,12 +149,9 @@ for (c in candidates[1:4]){
     
     '!!!!!!!!!!!!!!!!!!!!!'
     
-<<<<<<< HEAD
     fwurl <- "https://raw.githubusercontent.com/igorbrigadir/stopwords/master/en/cook1988_function_words.txt"
     
     functionwords <- 
-=======
->>>>>>> master
     number_stopwords <- which (words %in% stopwords("english"))
     number_stopwords %<>% ifelse(purrr::is_empty(.),0,.)
     ratio_function_words <- number_stopwords/M
@@ -242,13 +226,9 @@ for (c in candidates[1:4]){
   }
 }
 
-<<<<<<< HEAD
 saveRDS(df,"data/processed_data.rds")
 
 
-=======
-saveRDS(df,"processed_data.rds")
->>>>>>> master
 
 
 # Advanced Data Management: tm-package/Corpus operations
