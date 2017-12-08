@@ -18,7 +18,17 @@ for (c in candidates){
 
 #00006 + 00037
 files[["candidate00006"]] <- files[["candidate00006"]] %>% .[. != "known00037.txt"]
+
+# Throw out candidate 20 as a whole (to many probs)
+
 files[["candidate00020"]] <- files[["candidate00020"]] %>% .[. != "known00054.txt"]
+files[["candidate00020"]] <- files[["candidate00020"]] %>% .[. != "known00070.txt"]
+files[["candidate00020"]] <- files[["candidate00020"]] %>% .[. != "known00072.txt"]
+files[["candidate00020"]] <- files[["candidate00020"]] %>% .[. != "known00073.txt"]
+files[["candidate00024"]] <- files[["candidate00024"]] %>% .[. != "known00014.txt"]
+files[["candidate00026"]] <- files[["candidate00026"]] %>% .[. != "known00051.txt"]
+files[["candidate00026"]] <- files[["candidate00026"]] %>% .[. != "known00070.txt"]
+
 
 content <- list()
 
@@ -54,20 +64,19 @@ df <- data.frame()
 ##################
 content[[c]][[t]]
 # problem at 0006 ~ 0037
-
+c = "candidate00026"
+t = 69
 
 #################
 
-
-
 for (c in candidates){
   
-  # throw out | 0006+0037
-  
+  print(c)
   
   ts <- 1:length(files[[c]])
-  
   for (t in ts){
+    
+    print(t)
     
     ## fixes
     
@@ -230,147 +239,6 @@ saveRDS(df,"data/processed_data.rds")
 
 
 
-
-# Advanced Data Management: tm-package/Corpus operations
-
-
-# E-Mail Content: 
-docs_raw <- (VCorpus(VectorSource(data$ExtractedBodyText)))
-docs <- docs_raw 
-
-summary(docs)   
-#inspect(docs[1])
-#writeLines(as.character(docs[2]))
-
-
-# Removing Punctuation (loss of information)
-#docs <- tm_map(docs,removePunctuation)   
-
-# Removing numbers (Do not want this: loss of information)
-#docs <- tm_map(docs, removeNumbers)   
-
-# converting to lowercase (loss of information)
-#docs <- tm_map(docs, tolower)   
-
-# Remove stopwords (do I really wanna do this?) => nope
-length(stopwords("english"))   
-stopwords("english")   
-# docs <- tm_map(docs, removeWords, stopwords("english"))   
-# docs <- tm_map(docs, PlainTextDocument)
-
-# Remove other particular words
-docs <- tm_map(docs, removeWords, c("studienstiftung", "merkel"))   
-
-## Optional: Stemming the end
-#docs_st <- tm_map(docs, stemDocument)   
-#docs_st <- tm_map(docs_st, PlainTextDocument)
-#writeLines(as.character(docs_st[1])) # Check to see if it worked.
-# docs <- docs_st
-
-# so far so good the processing
-docs <- tm_map(docs_final, PlainTextDocument)
-
-
-########## Document Term / Term Document Matrices ##########
-
-# DTM
-dtm <- DocumentTermMatrix(docs)   
-#dtm   
-dtm_matrix <- as.matrix(dtm) 
-
-freq <- colSums(dtm_matrix)   
-freq   
-
-wf <- data.frame(word=names(freq), freq=freq)   
-wf_ordered <- wf[order(wf$freq,decreasing = T),]
-
-dim(dtm_matrix)
-
-sub_matrix <- dtm_matrix[,colnames(dtm_matrix) %in% wf_ordered[1:122,]$word]
-rownames(sub_matrix) <- 1:nrow(sub_matrix)
-
-#  Start by removing sparse terms:   
-# ??dtms <- removeSparseTerms(dtm, 0.2) # This makes a matrix that is 20% empty space, maximum.   
-#dtms
-#??? 
-
-
-
-## STOPWORDS ? 
-
-
-##Total number of function words/M
-# yti ???
-
-##Function word frequency distribution (122 features)
-test = (sub_matrix / (rep.col(data$number_words,ncol(sub_matrix)))) 
-
-# https://raw.githubusercontent.com/pan-webis-de/devel01/master/functionWords184.txt
-#https://raw.githubusercontent.com/pan-webis-de/devel01/master/functionWords319.txt
-
-
-
-##Count of hapax legomena/M
-# does not work because almost all mails to short!!!
-
-##Count of hapax legomena/V
-# does not work because almost all mails to short!!!
-
-##Total number of space characters/C
-# ??? diference to white-space
-
-##Total number of space characters/number white-space characters
-# ??? see above
-
-##Total number of tab spaces/C
-# ??? yti
-
-##Total number of tab spaces/number white-space characters
-# ???yti
-
-
-
-
-##Word length frequency distribution/M (30 features)
-
-# dim(dtm_matrix)
-# rownames(dtm_matrix) <- 1:nrow(dtm_matrix)
-# x = sapply(colnames(dtm_matrix),function(x) str_length(x))
-# length(x)
-# 
-# dim(dtm_matrix)
-# dtm_matrix[,1:10]
-# 
-# # yet to slow!!!!!
-# sub_matrix <- 
-#   dtm_matrix %>% 
-#   melt() %>% 
-#   mutate(length = str_length(Terms)) %>%
-#   filter (length <30) %>%  #check how many numbers
-#   group_by(Docs,length) %>% 
-#   summarise(total = sum(value,na.rm = TRUE)) %>% 
-#   tidyr::spread(length,total)
-# 
-# 
-# freq <- colSums(dtm_matrix)   
-# freq   
-# 
-# wf <- data.frame(word=names(freq), freq=freq)   
-# wf2 <- wf %>% mutate(length = str_length(word)) %>% 
-# 
-# 
-# wf_ordered <- wf[order(wf$freq,decreasing = T),]
-# 
-# dim(dtm_matrix)
-
-
-
-
-
-
-
-
-
 ###################################################################
 
 ### Structural Attributes (all not implementable to the moment)
@@ -383,14 +251,7 @@ test = (sub_matrix / (rep.col(data$number_words,ncol(sub_matrix))))
 ## HTML tag frequency distribution/total number of HTML tags (16 features)
 
 
-## Other structural stuff
 
 
-
-
-#######################################################################
-## Save Data
-
-saveRDS(data,file = "../data/processed_data.rds")
 
 

@@ -4,26 +4,36 @@
 
 # Read data
 
-data_all <- readRDS(file = "processed_data.rds")
+data_all <- readRDS(file = "data/processed_data1.rds")
 names(data_all)
 
 
 # Look at authors/dep.variable
-data$candidate %>% table() %>% sort()
+data_all$candidate %>% table() %>% sort()
+
+data_sub <- 
+  data_all %>% 
+  group_by(candidate) %>% 
+  filter(n() >= 50) %>% 
+  as.data.frame()
+
+data_sub$candidate %>% table() %>% sort()
+
 
 data <- 
-  data_all %>% 
+  data_sub %>% 
   select(-t,
          -blank_lines,
          -total_lines,
          -number_stopwords,
          -number_shortwords) 
 
+names(data)
 
 # Z-standardize
 data_z <- 
   data %>% 
-  mutate_at(vars(-candidate,-text),
+  mutate_at(vars(-one_of("candidate","text")),
             funs( (.-mean(.,na.rm = T))/sd(.,na.rm = T))) 
 
 
@@ -34,9 +44,11 @@ model_data <- data_z %<>% na.omit()
 ggplot(data = model_data) +
   geom_bar(aes(x = candidate),stat = "count")+
   geom_text(aes(x = candidate,label = ..count..),nudge_y = 20,stat = "count")
-  hrbrthemes::theme_ipsum(grid = "Y") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1,vjust = 1)) +
+  theme(axis.text = element_text(angle = 90, hjust = 1,vjust = 1)) +
   labs(title = "Author Frequency")
+  
+
+# For model data, create 
   
 
 # Splitting in training and test data
