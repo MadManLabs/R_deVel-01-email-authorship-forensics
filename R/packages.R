@@ -21,6 +21,7 @@ install.load::install_load("plyr",
                            "extrafont",
                            "ggrepel",
                            "wordcloud2",
-                           "reshape2") #
+                           "reshape2",
+                           "readtext") #
 
 loadfonts(device="pdf")  

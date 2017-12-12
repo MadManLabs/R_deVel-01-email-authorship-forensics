@@ -1,5 +1,10 @@
 # Functions
 
+source("R/packages.R")
+
+
+# Overview here: https://stat.ethz.ch/R-manual/R-devel/library/base/html/regex.html
+
 full_text <- lipsum::lipsum[1]
 
 
@@ -79,4 +84,36 @@ space_chars <- function(x) {
   paste(unlist(stringi::stri_extract_all_regex(x, "[:space:]")),collapse = "")
 }
 
+white_space <- function(x) {
+  paste(unlist(stringi::stri_extract_all_regex(x, " ")),collapse = "")
+}
+
+# Greeting formula
+
+greet <- c("hello",
+           "hi",
+           "dear"
+           )
+
+Greet <- greet %>% str_to_title()
+
+# Farewell Formula
+
+farewell <- c("best",
+              "yours sincerely",
+              "greetings",
+              "take care",
+              "thanks",
+              "cheers",
+              "regards")
+
+Farewell <- farewell %>% str_to_title()
+
+## Functionwords
+
+fw_url <- "https://raw.githubusercontent.com/igorbrigadir/stopwords/master/en/cook1988_function_words.txt"
+functionwords <- read.table(file = fw_url,fill = TRUE,stringsAsFactors = F,encoding = "UTF-8")[,1]
+functionwords %<>% str_replace_all("\\n","")
+
+# signature text
 

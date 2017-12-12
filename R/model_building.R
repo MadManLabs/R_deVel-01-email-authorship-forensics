@@ -4,9 +4,8 @@
 
 # Read data
 
-data_all <- readRDS(file = "data/processed_data1.rds")
+data_all <- readRDS(file = "data/processed_data.rds")
 names(data_all)
-
 
 # Look at authors/dep.variable
 data_all$candidate %>% table() %>% sort()
@@ -39,17 +38,18 @@ data_z <-
 
 model_data <- data_z %<>% na.omit()
 
-
 # Get frequencies
 ggplot(data = model_data) +
   geom_bar(aes(x = candidate),stat = "count")+
   geom_text(aes(x = candidate,label = ..count..),nudge_y = 20,stat = "count")
-  theme(axis.text = element_text(angle = 90, hjust = 1,vjust = 1)) +
+theme(axis.text = element_text(angle = 90, hjust = 1,vjust = 1)) +
   labs(title = "Author Frequency")
-  
+
+# Throw out M,V,C
 
 # For model data, create 
-  
+
+
 
 # Splitting in training and test data
 

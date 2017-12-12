@@ -3,7 +3,7 @@ source("R/packages.R")
 
 # Data loading and preparation
 
-datapath <- "data/offline/pan11/pan11-authorship-attribution-test-dataset-small-2015-10-20/pan11-authorship-attribution-test-dataset-small-2015-10-20"
+datapath <- "data/offline/pan11"
 
 dir(datapath)
 candidates <- dir(datapath) %>% .[str_detect(.,"candidate")]
@@ -30,7 +30,49 @@ files[["candidate00026"]] <- files[["candidate00026"]] %>% .[. != "known00051.tx
 files[["candidate00026"]] <- files[["candidate00026"]] %>% .[. != "known00070.txt"]
 
 
+
+# Test space
+
+# c = "candidate00011"
+# t = 4
+# text <- 
+#   read.table(file = paste0(datapath,"/",c,"/",files[[c]][t]),
+#              fill = T,
+#              blank.lines.skip = F,
+#              stringsAsFactors = FALSE,
+#              encoding = "UTF-8",
+#              row.names=NULL) %>% 
+#   as.data.frame()
+
+
+# Count tab spaces
+
+
+tabs <- list()
+
+for (c in candidates){
+  tabb <- list()
+  
+  for (t in 1:length(files[[c]])){
+    
+    x <- readtext(file = paste0(datapath,"/",c,"/",files[[c]][t]))
+    n_tabs <- x$text %>% str_locate_all("\t") %>%.[[1]] %>% nrow()
+    
+    tabb[[paste0(files[[c]][t])]] <- n_tabs
+  }
+  
+  tabs[[c]] <- tabb
+}
+
+saveRDS(tabs,"data/tabs.rds")
+
+##############################################################
+#############################################################
+
+
 content <- list()
+
+# candidates <- candidates[1:2]
 
 for (c in candidates){
   candi <- list()
@@ -58,15 +100,10 @@ saveRDS(content,"data/raw_content.rds")
 source("R/feature_functions.R")
 ###
 
+
+
+
 df <- data.frame()
-
-
-##################
-content[[c]][[t]]
-# problem at 0006 ~ 0037
-c = "candidate00026"
-t = 69
-
 #################
 
 for (c in candidates){
@@ -156,18 +193,21 @@ for (c in candidates){
     
     #5: Total number of function words/M 
     
-    '!!!!!!!!!!!!!!!!!!!!!'
-    
-    fwurl <- "https://raw.githubusercontent.com/igorbrigadir/stopwords/master/en/cook1988_function_words.txt"
-    
-    functionwords <- 
-    number_stopwords <- which (words %in% stopwords("english"))
+    number_stopwords <- which (words %in% functionwords) %>% length()
     number_stopwords %<>% ifelse(purrr::is_empty(.),0,.)
     ratio_function_words <- number_stopwords/M
       
     #6: Function word frequency distribution (122 features)
     
-    '!!!!!!!!!!!!!!!!!!!!!???????'
+
+        
+    for (fw in functionwords){
+      fw_clean <- str_replace_all(fw,"'","_")
+      eval(parse(text = paste0("freq_",fw_clean," <- ",length(which(str_length(words) == fw))/M)))
+    }
+    
+    function_freqs <- eval(parse(text = paste0("data.frame(",paste0("freq_",str_replace_all(functionwords,"'","_"),collapse = ","),")")))
+    
     
     #7: Total number of short words/M
     number_shortwords <- countShortWords(full_text)
@@ -191,6 +231,33 @@ for (c in candidates){
     #13: Total number of digit characters in words/C
     ratio_digit <- nchar(digit_chars(full_text))/C
     
+    ###############################################
+    
+    tabs_n <- tabs[[c]][[t]]
+    
+    #14: Total number of white-space characters/C
+    
+    ratio_white_space <- nchar(white_space(full_text))/C
+    
+    #15: Total number of space characters/C
+    
+    ratio_space <- (tabs_n + nchar(space_chars(full_text)))/C
+    
+    #16: Total number of space characters/number white-space characters
+    
+    ratio_space_whitespace <- nchar(space_chars(full_text)) / nchar(white_space(full_text))
+    
+    #17: Total number of tab spaces/C
+    
+    ratio_tab <- tabs_n/C
+    
+    #18: Total number of tab spaces/number white-space characters
+    
+    ratio_tab_white <- tabs_n/ nchar(white_space(full_text))
+    
+    ##############################################
+    
+    
     #19: Total number of punctuations/C
     ratio_punctuation <- countPunctuation(full_text)/C
     
@@ -200,15 +267,31 @@ for (c in candidates){
     }
     freqs <- eval(parse(text = paste0("data.frame(",paste0("l_",1:30,collapse = ","),")")))
     
+    #21: Has a greeting acknowledgement
+    
+    greeting_ack <- ifelse(str_detect(full_text,paste0(Greet,collapse = " | "))|
+                           str_detect(full_text,paste0(greet,collapse = " | ")),
+                           1,0)
+    
+    #22: Uses a farewell acknowledgement
+    
+    farewell_ack <- ifelse(str_detect(full_text,paste0(farewell,collapse = " | "))|
+                           str_detect(full_text,paste0(Farewell,collapse = " | ")),
+                           1,0)
     
     
     #Put it together
   new_row <- data.frame(candidate = c,
                         text = files[[c]][t],
                         t = t,
+                        M,
+                        V,
+                        C,
                         blank_lines,
                         total_lines,
                         blank_line_ratio,
+                        ratio_function_words,
+                        function_freqs,
                         average_sentence_length,
                         average_word_length,
                         vocabulary_richness,
@@ -222,8 +305,15 @@ for (c in candidates){
                         ratio_alphabetic,
                         ratio_upper,
                         ratio_digit, # 13
+                        ratio_white_space,
+                        ratio_space,
+                        ratio_space_whitespace,
+                        ratio_tab,
+                        ratio_tab_white,
                         ratio_punctuation, # 19
-                        freqs
+                        freqs,
+                        greeting_ack,
+                        farewell_ack
                         )
   
   
