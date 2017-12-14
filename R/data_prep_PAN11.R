@@ -17,10 +17,9 @@ for (c in candidates){
 # Remove following
 
 #00006 + 00037
+files[["candidate00005"]] <- files[["candidate00005"]] %>% .[. != "known00649.txt"]
 files[["candidate00006"]] <- files[["candidate00006"]] %>% .[. != "known00037.txt"]
-
-# Throw out candidate 20 as a whole (to many probs)
-
+files[["candidate00017"]] <- files[["candidate00017"]] %>% .[. != "known00314.txt"]
 files[["candidate00020"]] <- files[["candidate00020"]] %>% .[. != "known00054.txt"]
 files[["candidate00020"]] <- files[["candidate00020"]] %>% .[. != "known00070.txt"]
 files[["candidate00020"]] <- files[["candidate00020"]] %>% .[. != "known00072.txt"]
@@ -64,7 +63,7 @@ for (c in candidates){
   tabs[[c]] <- tabb
 }
 
-saveRDS(tabs,"data/tabs.rds")
+saveRDS(tabs,"data/pan11/tabs.rds")
 
 ##############################################################
 #############################################################
@@ -87,20 +86,18 @@ for (c in candidates){
                  encoding = "UTF-8",
                  row.names=NULL) %>% 
       as.data.frame()
-    candi[[paste0(files[[c]][t])]] <- text
+    if(nrow(text) > 0) candi[[paste0(files[[c]][t])]] <- text
   }
   
   content[[c]] <- candi
 }
 
-saveRDS(content,"data/raw_content.rds")
+saveRDS(content,"data/pan11/raw_content.rds")
 
 #  Features: 
 
 source("R/feature_functions.R")
 ###
-
-
 
 
 df <- data.frame()
@@ -110,7 +107,7 @@ for (c in candidates){
   
   print(c)
   
-  ts <- 1:length(files[[c]])
+  ts <- names(content[[c]])
   for (t in ts){
     
     print(t)
@@ -125,8 +122,6 @@ for (c in candidates){
       rowwise() %>% 
       do(text = paste0(.,collapse = " ")) %>% 
       .$text
-    
-    dim(rowwise_text)
     
     vector_row_text <- 
       rowwise_text %>% paste0()
@@ -203,7 +198,7 @@ for (c in candidates){
         
     for (fw in functionwords){
       fw_clean <- str_replace_all(fw,"'","_")
-      eval(parse(text = paste0("freq_",fw_clean," <- ",length(which(str_length(words) == fw))/M)))
+      eval(parse(text = paste0("freq_",fw_clean," <- ",length(which(words == fw))/M)))
     }
     
     function_freqs <- eval(parse(text = paste0("data.frame(",paste0("freq_",str_replace_all(functionwords,"'","_"),collapse = ","),")")))
@@ -282,7 +277,7 @@ for (c in candidates){
     
     #Put it together
   new_row <- data.frame(candidate = c,
-                        text = files[[c]][t],
+                        text = t,
                         t = t,
                         M,
                         V,
@@ -325,7 +320,7 @@ for (c in candidates){
   }
 }
 
-saveRDS(df,"data/processed_data.rds")
+saveRDS(df,"data/pan11/processed_data2.rds")
 
 
 
