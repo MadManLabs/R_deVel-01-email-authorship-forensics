@@ -52,44 +52,65 @@ ggplot(data = model_data_all) +
   labs(title = "Author Frequency")
 
 ##### 
-sub_cands <- sample(x = unique(model_data$candidate),size = 3,replace = F)
+
+
+
+
+sub_cands <- sample(x = unique(model_data_all$candidate),size = 3,replace = F)
 
 model_data <- 
   model_data_all %>% 
   filter(candidate %in% sub_cands) %>% 
   group_by(candidate) %>% 
-  sample_n(round(50/0.75))
+  sample_n(round(50))
 
-names(model_data_all)
+names(model_data)
+
+subsett <- function(i,total,split) {
+  df = data.frame(x = 1:total,
+             y = rep(c(1:split),each = total/split,len = total))
+  return(df[df$y == i,1])
+}
+
+subsett(i = 10,total = 50,split = 10)
 
 # Splitting in training and test data
+results <- data.frame()
+q = 1
 
-sample_training <- sample(1:nrow(model_data),round(nrow(model_data)*0.75),replace = FALSE)
+for(q in 1:10){
 
-training <- c(1:nrow(model_data)) %in% sample_training
-prediction <- !c(1:nrow(model_data)) %in% training
+model_data <- 
+  model_data %>% 
+  group_by(candidate) %>% 
+  mutate(lfdn = sample(x = 1:n(),size = n(),replace = FALSE))
 
 training_data <- 
-  model_data [training,]
+  model_data %>% 
+  filter(!lfdn %in% subsett(i = q,total = 50,split = 10))
+
 
 testing_data <- 
-  model_data [prediction,]
+  model_data %>% 
+  filter(lfdn %in% subsett(i = q,total = 50,split = 10))
 
 names(training_data)
 
 
 # Tune 1
 svm_tune1 <- 
-    tune(svm, factor(candidate)~ ., data = training_data,
-         kernel="polynomial", type = "C-classification",
+    tune(svm, factor(candidate)~ -lfdn, data = training_data,
+         kernel="radial", type = "C-classification",
          ranges=list(cost=10^(-3:5), 
-                     gamma=c(0.0001,0.001,0.01,0.1,.5,1,2,4,8,16)))
+                     gamma=10^(-3:5)),
+         tunecontrol = tune.control(sampling = "cross")
+         )
 svm_tune1
 
 ## classification mode
 # default with factor response:
 model <- svm(candidate ~ 
-             .,
+             -lfdn,
              data = training_data,
              gamma = svm_tune1$best.parameters$gamma,
              cost = svm_tune1$best.parameters$cost,
@@ -120,6 +141,19 @@ t2 <- round(table(predicted = predictions,
 
 (f <- (2*(precision*recall))/(precision+recall))
 
-
-
 accuracy <- length(which(predictions == testing_data$candidate))/length(predictions);accuracy
+
+out_pre <- sum(precision,na.rm = TRUE)/3
+out_rec <- sum(recall,na.rm = TRUE)/3
+out_f <- f
+
+results  <- 
+  bind_rows(results,
+                      data.frame(loop = q,
+                                 precision = out_pre,
+                                 recall = out_rec,
+                                 f_score = f,
+                                 accuracy = accuracy)
+)
+
+}
