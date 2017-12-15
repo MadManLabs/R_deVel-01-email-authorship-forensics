@@ -330,8 +330,18 @@ for (c in candidates){
 #saveRDS(df,"data/pan11/processed_data.rds")
 saveRDS(df,"data/pan11/unknown.rds")
 
+#saveRDS(df,"data/pan11/processed_data.rds")
+saveRDS(df,"data/pan11/unknown.rds")
 
+d <- readRDS("data/pan11/processed_data.rds")
+u <- readRDS("data/pan11/unknown.rds")
+json_file <- "data/offline/pan11/ground-truth.json"
+true <- fromJSON(txt = json_file, flatten=TRUE)  [[1]]
 
+true$text <- true$`unknown-text`
+true$`unknown-text` <- NULL
+
+save(list = c("d","u","true"),file = "test.rdata")
 
 ###################################################################
 
