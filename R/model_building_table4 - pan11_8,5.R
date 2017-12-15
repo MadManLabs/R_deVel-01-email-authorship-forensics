@@ -151,6 +151,8 @@ model <- svm(candidate ~
 print(model)
 summary(model)
 
+#save(list = "model",file = "model.rdata")
+
 
 # Calculate Decision Values and Probabilities
 predictions <- predict(model,
