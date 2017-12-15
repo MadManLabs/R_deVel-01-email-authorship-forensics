@@ -22,6 +22,8 @@ install.load::install_load("plyr",
                            "ggrepel",
                            "wordcloud2",
                            "reshape2",
-                           "readtext") #
+                           "readtext",
+                           "rjson",
+                           "jsonlite") #
 
 loadfonts(device="pdf")  

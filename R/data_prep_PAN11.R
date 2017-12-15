@@ -8,6 +8,9 @@ datapath <- "data/offline/pan11"
 dir(datapath)
 candidates <- dir(datapath) %>% .[str_detect(.,"candidate")]
 
+# candidates <- dir(datapath) %>% .[str_detect(.,"unknown")]
+
+
 # Create List of all files
 files <- list()
 for (c in candidates){
@@ -64,6 +67,8 @@ for (c in candidates){
 }
 
 saveRDS(tabs,"data/pan11/tabs.rds")
+# saveRDS(tabs,"data/pan11/tabs_unknown.rds")
+
 
 ##############################################################
 #############################################################
@@ -93,6 +98,8 @@ for (c in candidates){
 }
 
 saveRDS(content,"data/pan11/raw_content.rds")
+#saveRDS(content,"data/pan11/raw_content_unkown.rds")
+
 
 #  Features: 
 
@@ -320,7 +327,9 @@ for (c in candidates){
   }
 }
 
-saveRDS(df,"data/pan11/processed_data2.rds")
+#saveRDS(df,"data/pan11/processed_data.rds")
+saveRDS(df,"data/pan11/unknown.rds")
+
 
 
 
